@@ -1,0 +1,60 @@
+body {
+	font-family: sans-serif;
+}
+
+#wrapper {
+	width: 1200px;
+	margin: 60px auto 0;
+}
+
+#wrapper table {
+	width: 100%;
+	table-layout: fixed;
+}
+
+#about {
+	float: right;
+	padding: 3em 1em;
+}
+
+#description {
+	float: left;
+	padding: 3em 1em;
+}
+
+#options {
+	padding: 6px;
+	border: 1px solid gray;
+}
+
+#options h3 {
+	cursor: pointer;
+}
+
+.code {
+	width: 329px;
+	height: 465px;
+	overflow: auto;
+}
+
+#messages {
+	width: 100%;
+	display: none;
+	background-color: #F79F81;
+	padding: 6px;
+	border: 1px solid gray;
+}
+
+h3 {
+	margin: 0;
+	font-size: 1em;
+}
+
+#editors td {
+	height: 400px;
+}
+
+.activeline {
+	background: #82FA58 !important;
+}
+

@@ -1,0 +1,3 @@
+transcode translates standard ANSI C-code simultaniously into assembler and byte code.
+
+Steffen Vogel <info@steffenvogel.de>

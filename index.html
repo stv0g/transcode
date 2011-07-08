@@ -1,0 +1,92 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>transcode - avr-gcc compiler frontend</title>
+	<link rel="stylesheet" type="text/css" href="css/codemirror.css">
+	<link rel="stylesheet" type="text/css" href="css/codemirror.theme.css">
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.14.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<script src="js/codemirror.js" type="text/javascript"></script>
+	<script src="js/codemirror.clike.js" type="text/javascript"></script>
+	<script src="js/jquery-1.6.2.min.js" type="text/javascript"></script>
+	<script src="js/jquery-ui-1.8.14.min.js" type="text/javascript"></script>
+	<script src="js/script.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="wrapper">
+<h1>transcode - avr-gcc compiler frontend</h1>
+<table id="code">
+	<thead>
+		<tr><th>ANSI C-Code</th><th>Assembler Mnemonics</th><th>Maschinencode</th></tr>
+	</thead>
+	<tbody>
+		<tr id="editors">
+			<td id="ansic"></textarea></td>
+			<td id="assembler"></div></td>
+			<td id="byte"></td></tr>
+		<tr><td colspan="3" id="messages">
+			<h3>Fehler</h3>
+			<pre>
+			</pre>
+		</td></tr>
+		<tr><td colspan="3" id="options">
+			<h3>Options</h3>
+			<div><form name="options">
+				<table>
+					<tr><td>Kommentare</td><td><input type="checkbox" value="1" name="comments" /></td></tr>
+					<tr><td>Maschinencodierung</td><td>
+						<select name="format">
+							<option value="bin">bin&auml;r</option>
+							<option value="hex">hexadezimal</option>
+							<option value="dec">dezimal</option>
+						</select>
+					</td></tr>
+					<tr><td>Optimierungslevel</td><td><input name="olevel" type="text" value="0" /></td></tr>
+					<tr><td>Architektur / MCU Typ</td><td>
+						<select size="1" name="mmcu">
+							<optgroup label="MCU Typ">
+								<option value="attiny45">ATTiny45</option>
+								<option value="atmega8u2">ATMega8u2</option>
+								<option value="atmega8" selected="selected">ATMega8</option>
+								<option value="atmega16">ATMega16</option>
+								<option value="atmega328p">ATMega328p (Arduino)</option>
+								<option value="atmega644p">ATMega644p</option>
+								<option value="atxmega128a1">ATXMega128</option>
+							</optgroup>
+							<optgroup label="Architektur">
+								<option value="attiny28">"Classic" CPU core, up to 8 KB of ROM</option>
+								<option value="attiny48">"Classic" CPU core with 'MOVW' and 'LPM Rx, Z[+]' instruction, up to 8 KB of ROM</option>
+								<option value="atmega603">"Classic" CPU core, 16 KB to 64 KB of ROM</option>
+								<option value="atmega103">"Classic" CPU core, 128 KB of ROM</option>
+								<option value="attiny167">"Classic" CPU core with 'MOVW' and 'LPM Rx, Z[+]' instruction, 16 KB to 64 KB of ROM</option>
+								<option value="atmega48">"Enhanced" CPU core, up to 8 KB of ROM</option>
+								<option value="atmega16">"Enhanced" CPU core, 16 KB to 64 KB of ROM</option>
+								<option value="atmega1284p">"Enhanced" CPU core, 128 KB of ROM</option>
+								<option value="atmega2560">"Enhanced" CPU core, 256 KB of ROM</option>
+							</optgroup>
+						</select>
+					</td></tr>
+				</table>
+			</form></div>
+	    	</td></tr>
+	</tbody>
+</table>
+</div>
+<span id="about">
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/"><img alt="Creative Commons Lizenzvertrag" src="img/cc.png" /></a>
+<a href="http://www.rwth-aachen.de"><img alt="RWTH Aachen" src="img/rwth.png" /></a><br />
+&copy; Steffen Vogel &lt;<a href="mailto:info@steffenvogel.de">info@steffenvogel.de</a>&gt;
+</span>
+<div id="description">
+<h3>Beschreibung</h3>
+<p><i>transcode</i> kompiliert/assembliert ANSI C und Assembler in Maschinencode und umgekehrt.<br />
+Dabei wird mit Hilfe von Debugging Informationen ein Bezug zwischen Zeilen im C-Code und den Mnemonics hergestellt.<br />
+Durch Auswählen von Zeilen werden Bezüge direkt durch Hervorhebungen dargestellt.<br /></p>
+<p></i>transcode</i> ist im Rahmen der Vorlesung <i>Grundlagen der Informatik 2</i> von Prof. Rossmann<br />
+als Beitrag für den <i>Fellow Student Enlightment Award</i> entstanden.</p>
+<p>Aachen, 8.7.11</p>
+</div>
+</body>
+</html>
