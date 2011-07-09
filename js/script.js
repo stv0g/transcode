@@ -1,5 +1,6 @@
 var editors = {};
 var mapping = new Array;
+var timeout = null;
 
 jQuery(document).ready(function(){
 	$('#options h3').click(function() {
@@ -11,10 +12,11 @@ jQuery(document).ready(function(){
 		compile(editors['ansic']);
 	});
 	
-	editors['ansic'] = CodeMirror(document.getElementById('ansic'), {
-		indentWithTabs: true,
+	editors.ansic = CodeMirror(document.getElementById('ansic'), {
 		lineNumbers: true,
-		onChange: compile,
+		electricChars: false,
+		indentWithTabs: true,
+		onChange: trigger,
 		onCursorActivity: function(editor) {
 			var line = editor.getCursor().line;
 			var mappedLine = mapping[line+1]-1;
@@ -22,31 +24,27 @@ jQuery(document).ready(function(){
 			var p = line+2;
 			while(!mapping[p] && p <= editor.lineCount()) p++;
 			
-			var mappingEnd = mapping[p]-2;
+			var mappingEnd = mapping[p]-1;
 			
 			if (mappedLine) {
-				editors['assembler'].setCursor(mappedLine);
+				editors.assembler.setCursor(mappedLine);
 				highlightLines(editor, line);
-				highlightLines(editors['assembler'], range(mappedLine, mappingEnd));
+				highlightLines(editors.assembler, range(mappedLine, mappingEnd));
 			}
 		}
 	});
 	
-	editors['assembler'] = CodeMirror(document.getElementById('assembler'), {
-		indentWithTabs: true,
-		lineNumbers: true,
+	editors.assembler = CodeMirror(document.getElementById('assembler'), {
 		readOnly: true,
-		onCursorActivity: function(editor) {
-			highlightLines(editor, editor.getCursor().line);
+		onScroll: function(editor) {
+			editors.byte.getScrollerElement().scrollTop = editor.getScrollerElement().scrollTop;
 		}
 	});
 	
-	editors['byte'] = CodeMirror(document.getElementById('byte'), {
-		indentWithTabs: true,
-		lineNumbers: true,
+	editors.byte = CodeMirror(document.getElementById('byte'), {
 		readOnly: true,
-		onCursorActivity: function(editor) {
-			highlightLines(editor, editor.getCursor().line);
+		onScroll: function(editor) {
+			editors.assembler.getScrollerElement().scrollTop = editor.getScrollerElement().scrollTop;
 		}
 	});
 	
@@ -74,8 +72,16 @@ function highlightLines(editor, lines) {
 	editor.hlLines = lines;
 }
 
-function compile(editor) {
-	var code = editor.getValue();
+function trigger() {
+	if (timeout) {
+		window.clearTimeout(timeout);
+	}
+
+	timeout = window.setTimeout(compile, 500);
+}
+
+function compile() {
+	var code = editors.ansic.getValue();
 	var options = {
 		olevel: $('input[name=olevel]').val(),
 		mmcu: $('select[name=mmcu] option:selected').val(),
@@ -84,8 +90,8 @@ function compile(editor) {
 	}
 	
 	$.post('compile.php?' + $.param(options), code, function(json) {
-		editors['assembler'].setValue(json.code.assembler);
-		editors['byte'].setValue(json.code.byte);
+		editors.assembler.setValue(json.code.assembler);
+		editors.byte.setValue(json.code.byte);
 
 		if (json.messages.length > 0) {
 			$('#messages pre').text(json.messages);
@@ -96,6 +102,7 @@ function compile(editor) {
 		}
 		
 		mapping = json.mapping;
+		timeout = null; // free timeout
 	}, 'json');
 }
 
