@@ -4,12 +4,12 @@ header('Content-type: application/json');
 
 /* Configuration */
 $maxLength = 2048;
-$allowedMmcus = array('attiny15', 'attiny45', 'atmega8u2', 'atmega8', 'atmega328p', 'atmega644p', 'atxmega128a1', 'avr1', 'avr2', 'avr25', 'avr3', 'avr31', 'avr35', 'avr4', 'avr5', 'avr51', 'avr6');
+$allowedMmcus = array('attiny15', 'attiny45', 'atmega8u2', 'atmega8', 'atmega328p', 'atmega644p', 'atxmega128a1', 'attiny28', 'attiny48', 'atmega603', 'atmega103', 'attiny167', 'atmega48', 'atmega16', 'atmega1284p', 'atmega2560');
 
 $oLevel = (isset($_GET['olevel'])) ? (int) $_GET['olevel'] : 0;
 $mmcu = (isset($_GET['mmcu'])) ? $_GET['mmcu'] : 'atmega8';
 $format = (isset($_GET['format'])) ? $_GET['format'] : 'bin';
-$comments = (isset($_GET['comments']) && $_GET['comments'] == 'true');
+$comments = (isset($_GET['comments']) && $_GET['comments'] == '1');
 
 $codeFile = tempnam('/tmp', 'tc_in_') . '.c';
 $code = file_get_contents('php://input');
@@ -28,28 +28,42 @@ else {
 	exec($cmd, $messages, $result);
 	
 	// objdump
-	$cmd = 'avr-objdump -w -d -l ' . $outFile . ' 2>&1';
+	$cmd = 'avr-objdump -w -d -l -z ' . $outFile . ' 2>&1';
 	$dump = shell_exec($cmd);
 
 	// refactor
 	$dumpLines = explode("\n", $dump);
 	$assembler = array();
 	$byte = array();
+	
+	$lastMapping = null;
+	$lastLine = null;
 	$mapping = array();
 
 	foreach ($dumpLines as $line) { // parsing objdump
-		if (preg_match('/^\s+([0-9a-f]+):\t+([0-9a-f ]{5})\s+(.*)\t; (.*)/', $line, $matches)) { // mnemonic
-			$mnemonic = ($comments) ? $matches[3] . "\t;" . $matches[4] : $matches[3];
+		if (preg_match('/^\s+([0-9a-f]+):\t([0-9a-f ]{5})\s+(.*)(\t;.*)?/', $line, $matches)) { // mnemonic
+			$mnemonic = ($comments && isset($matches[4])) ? $matches[3] . $matches[4] : $matches[3];
 			$assembler[] = $mnemonic;
 			$byte[] = format($matches[2], $format);
 		}
-		elseif (preg_match('/^([0-9a-f]{8}) <(.*)>:/', $line, $matches)) { // assembler label
+		elseif (preg_match('/^([0-9a-f]{8}) <(.*)>:/', $line, $matches)) { // label
 			$assembler[] = $matches[2] . ':';
 		}
-		elseif (preg_match('~^' . $codeFile . ':([0-9]+)~', $line, $matches)) {
-			$mapping[$matches[1]] = count($assembler)+1;
+		elseif (preg_match('~^' . $codeFile . ':([0-9]+)~', $line, $matches)) { // mapping
+			$currentMapping = count($assembler);
+			$currentLine = $matches[1];
+			
+			if ($lastMapping && $lastLine) {
+				$mapping[$lastLine] = array($lastMapping, $currentMapping);
+			}
+			
+			$lastLine = $currentLine;
+			$lastMapping = $currentMapping+1;
 		}
 	}
+	
+	// Rest
+	$mapping[$lastLine] = array($lastMapping, count($assembler));
 }
 
 $json = array(
@@ -68,18 +82,19 @@ unlink($codeFile);
 unlink($outFile);
 
 function format($data, $format) {
-	$hex = strtr($data, ' ', '');
-	$dec = hexdec($hex);
-
 	if ($format == 'hex') {
-			return $hex;
+		return $data;
 	}
 	else if ($format == 'dec') {
-		return $dec;
+		$dec = array();
+		foreach (explode(' ', $data) as $char) {
+			$dec[] = str_pad(hexdec($char), 3, ' ', STR_PAD_LEFT);
+		}
+		return implode(' ', $dec);
 	}
 	else { // if ($format == 'bin') { default
 		$bin = array();
-		foreach (str_split($hex) as $char) {
+		foreach (str_split(strtr($data, ' ', '')) as $char) {
 			$bin[] = str_pad(decbin(hexdec($char)), 4, '0', STR_PAD_LEFT);
 		}
 		return implode(' ', $bin);

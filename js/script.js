@@ -1,99 +1,83 @@
-var editors = {};
 var mapping = new Array;
 var timeout = null;
 
-jQuery(document).ready(function(){
-	$('#options h3').click(function() {
+$(document).ready(function(){
+	$('h3').click(function() {
 		$(this).next().toggle('slow');
 		return false;
-	}).next().hide();
-	
-	$('form[name=options] :input').change(function() {
-		compile(editors['ansic']);
 	});
 	
-	editors.ansic = CodeMirror(document.getElementById('ansic'), {
-		lineNumbers: true,
-		electricChars: false,
-		indentWithTabs: true,
-		onChange: trigger,
-		onCursorActivity: function(editor) {
-			var line = editor.getCursor().line;
-			var mappedLine = mapping[line+1]-1;
-			
-			var p = line+2;
-			while(!mapping[p] && p <= editor.lineCount()) p++;
-			
-			var mappingEnd = mapping[p]-1;
-			
-			if (mappedLine) {
-				editors.assembler.setCursor(mappedLine);
-				highlightLines(editor, line);
-				highlightLines(editors.assembler, range(mappedLine, mappingEnd));
-			}
-		}
-	});
-	
-	editors.assembler = CodeMirror(document.getElementById('assembler'), {
-		readOnly: true,
-		onScroll: function(editor) {
-			editors.byte.getScrollerElement().scrollTop = editor.getScrollerElement().scrollTop;
-		}
-	});
-	
-	editors.byte = CodeMirror(document.getElementById('byte'), {
-		readOnly: true,
-		onScroll: function(editor) {
-			editors.assembler.getScrollerElement().scrollTop = editor.getScrollerElement().scrollTop;
-		}
+	$('form').change(function() {
+		compile();
 	});
 	
 	// load default code
-	$.get('main.c', function(data) {
-		editors['ansic'].setValue(data);
+	loadCode('ex1.c');
+	
+	$('#examples select').change(function() {
+		loadCode($(this).val());
+	});
+	
+	$('.editor textarea')
+		.scroll(function() {
+			$(this).prev().scrollTop($(this).scrollTop());
+		})
+		.keypress(function() {
+			updateEditor($(this));
+		})
+		.keyup(function () {
+			if (timeout) {
+				window.clearTimeout(timeout);
+			}
+
+			timeout = window.setTimeout(compile, 500);
+		})
+		.keydown(function(e) {
+			if (e.keyCode == 9) {
+				insertAtCaret(this, "\t")
+				return false; // prevent default action
+			}
+		});
+		
+	$('#ansic textarea').mousemove(function(e) {
+			var pres = $(this).prev().children();
+			var over;
+			
+			pres.each(function(index, elm) {
+				if (e.layerY > elm.offsetTop && e.layerY < elm.offsetTop+15) {
+					over = $(elm);
+					return false;
+				}
+			});
+			
+			if (over) {
+				var line = over.index()+1;
+				var mappedLines = mapping[line];
+			
+				if (mappedLines) {
+					selectLines($(this), line);
+					selectLines($('#assembler textarea'), mappedLines[0], mappedLines[1]);
+				}
+			}
+		});
+		
+	$('#assembler textarea').scroll(function() {
+		$('#byte textarea').scrollTop($(this).scrollTop());
+	});
+	
+	$('#byte textarea').scroll(function() {
+		$('#assembler textarea').scrollTop($(this).scrollTop());
 	});
 });
 
-function highlightLines(editor, lines) {
-	if (!$.isArray(lines)) {
-		lines = [lines];
-	}
-
-	if (editor.hlLines) {
-		$.each(editor.hlLines, function(index, value) {
-			editor.setLineClass(value, null);
-		});
-	}
-	
-	$.each(lines, function(index, value) {
-		editor.setLineClass(value, 'activeline');
-	});
-	
-	editor.hlLines = lines;
-}
-
-function trigger() {
-	if (timeout) {
-		window.clearTimeout(timeout);
-	}
-
-	timeout = window.setTimeout(compile, 500);
-}
-
 function compile() {
-	var code = editors.ansic.getValue();
-	var options = {
-		olevel: $('input[name=olevel]').val(),
-		mmcu: $('select[name=mmcu] option:selected').val(),
-		comments: $('input[name=comments]').attr('checked') == 'checked',
-		format: $('select[name=format] option:selected').val()
-	}
-	
-	$.post('compile.php?' + $.param(options), code, function(json) {
-		editors.assembler.setValue(json.code.assembler);
-		editors.byte.setValue(json.code.byte);
+	var code = $('#ansic textarea').val();
+		
+	$.post('compile.php?' + $('form').serialize(), code, function(json) {
+		updateEditor($('#assembler .editor textarea'), json.code.assembler);
+		updateEditor($('#byte .editor textarea'), json.code.byte);
 
-		if (json.messages.length > 0) {
+		if (json.messages) {
 			$('#messages pre').text(json.messages);
 			$('#messages').show('slow');
 		}
@@ -112,4 +96,61 @@ function range(start, end) {
 		arr.push(i);
 	}
 	return arr;
+}
+
+function insertAtCaret(element, text) {
+	if (document.selection) {
+		element.focus();
+		var sel = document.selection.createRange();
+		sel.text = text;
+		element.focus();
+	} else if (element.selectionStart || element.selectionStart === 0) {
+		var startPos = element.selectionStart;
+		var endPos = element.selectionEnd;
+		var scrollTop = element.scrollTop;
+		element.value = element.value.substring(0, startPos) + text + element.value.substring(endPos, element.value.length);
+		element.focus();
+		element.selectionStart = startPos + text.length;
+		element.selectionEnd = startPos + text.length;
+		element.scrollTop = scrollTop;
+	} else {
+		element.value += text;
+		element.focus();
+	}
+}
+
+function selectLines(editor, start, end) {
+	var pres = editor.prev().children();
+	pres.removeClass('activeline'); // deselect all
+	
+	if (end == undefined) {
+		end = start;
+	}
+
+	for (var i = start; i <= end; i++) {
+		pres.eq(i-1).addClass('activeline');
+	}
+	
+	$('#assembler textarea').scrollTop(pres.get(start-1).offsetTop-50); // scroll to top of selection
+}
+
+function updateEditor(editor, value) {
+	if (value) {
+		editor.val(value);
+	}
+	
+	var overlay = editor.prev();
+	var lines = editor.val().split("\n").length;
+	
+	overlay.empty();
+	for (var i = 0; i < lines; i++) {
+		overlay.append($('<pre>').text(i+1));
+	}
+}
+
+function loadCode(file) {
+	$.get(file, function(data) {
+		updateEditor($('#ansic textarea'), data);
+		compile();
+	});
 }

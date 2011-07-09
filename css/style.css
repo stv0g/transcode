@@ -2,19 +2,83 @@ body {
 	font-family: sans-serif;
 }
 
+td {
+	vertical-align: top;
+}
+
+h3 {
+	margin: 0;
+	font-size: 1em;
+	cursor: pointer;
+}
+
 #wrapper {
-	width: 1200px;
+	width: 1000px;
 	margin: 60px auto 0;
 }
 
 #wrapper table {
 	width: 100%;
-	table-layout: fixed;
+}
+
+#byte {
+	width: 210px;
+}
+
+#ansic textarea {
+	height: 461px;
+}
+
+#ansic {
+	width: 370px;
+}
+
+.editor {
+	position: relative;
+	border: 1px solid gray;
+	padding-left: 20px;
+	height: auto;
+}
+
+.editor textarea {
+	height: 500px;
+	width: 100%;
+	margin: 0;
+
+	overflow: auto;
+	border: none;
+	resize: none;
+	background: transparent;
+}
+
+.editor div.overlay {
+	position: absolute;
+	margin-left: -18px;
+	overflow: hidden;
+	height: 500px;
+	width: 100%;
+	z-index: -1;
+}
+
+.editor div pre {
+	margin: 0;
+	width: 100%;
+	color: gray;
+}
+
+.activeline {
+	background: #82FA58;
 }
 
 #about {
 	float: right;
 	padding: 3em 1em;
+}
+
+#examples {
+	margin: 5px 10px 5px -10px;
+	padding-top: 3px;
+	border-top: 1px solid gray;
 }
 
 #description {
@@ -27,35 +91,11 @@ body {
 	border: 1px solid gray;
 }
 
-#options h3 {
-	cursor: pointer;
-}
-
-.code {
-	width: 329px;
-	height: 465px;
-	overflow: auto;
-}
-
 #messages {
 	width: 100%;
 	display: none;
 	background-color: #F79F81;
 	padding: 6px;
 	border: 1px solid gray;
-}
-
-h3 {
-	margin: 0;
-	font-size: 1em;
-}
-
-#editors td {
-	height: 400px;
-}
-
-.activeline {
-	background: #82FA58 !important;
-	width: 366px;
 }
 

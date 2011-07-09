@@ -4,14 +4,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title>transcode - avr-gcc compiler frontend</title>
-	<link rel="stylesheet" type="text/css" href="css/codemirror.css">
-	<link rel="stylesheet" type="text/css" href="css/codemirror.theme.css">
-	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.14.css">
 	<link rel="stylesheet" type="text/css" href="css/style.css">
-	<script src="js/codemirror.js" type="text/javascript"></script>
-	<script src="js/codemirror.clike.js" type="text/javascript"></script>
 	<script src="js/jquery-1.6.2.min.js" type="text/javascript"></script>
-	<script src="js/jquery-ui-1.8.14.min.js" type="text/javascript"></script>
 	<script src="js/script.js" type="text/javascript"></script>
 </head>
 <body>
@@ -22,14 +16,36 @@
 		<tr><th>ANSI C-Code</th><th>Assembler Mnemonics</th><th>Maschinencode</th></tr>
 	</thead>
 	<tbody>
-		<tr id="editors">
-			<td id="ansic"></textarea></td>
-			<td id="assembler"></div></td>
-			<td id="byte"></td></tr>
+		<tr>
+			<td id="ansic">
+				<div class="editor">
+					<div class="overlay"></div>
+					<textarea wrap="off"></textarea>
+					<div id="examples">
+						Lade Beispielcode:&nbsp;
+						<select size="1" >
+							<option value="ex1.c">Simple Loop</option>
+							<option value="ex2.c">Fibonacci</option>
+						</select>
+					</div>
+				</div>
+			</td>
+			<td id="assembler">
+				<div class="editor">
+					<div class="overlay"></div>
+					<textarea wrap="off"></textarea>
+				</div>
+			</td>
+			<td id="byte">
+				<div class="editor">
+					<div class="overlay"></div>
+					<textarea wrap="off"></textarea>
+				</div>
+			</td>
+		</tr>
 		<tr><td colspan="3" id="messages">
 			<h3>Fehler</h3>
-			<pre>
-			</pre>
+			<pre></pre>
 		</td></tr>
 		<tr><td colspan="3" id="options">
 			<h3>Options</h3>
