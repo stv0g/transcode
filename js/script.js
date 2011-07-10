@@ -40,34 +40,58 @@ $(document).ready(function(){
 		});
 		
 	$('#ansic textarea').mousemove(function(e) {
-			var pres = $(this).prev().children();
-			var over;
-			
-			pres.each(function(index, elm) {
-				if (e.layerY > elm.offsetTop && e.layerY < elm.offsetTop+15) {
-					over = $(elm);
-					return false;
-				}
-			});
-			
-			if (over) {
-				var line = over.index()+1;
-				var mappedLines = mapping[line];
-			
-				if (mappedLines) {
-					selectLines($(this), line);
-					selectLines($('#assembler textarea'), mappedLines[0], mappedLines[1]);
-				}
+		var pres = $(this).prev().children();
+		var over;
+		
+		pres.each(function(index, elm) {
+			if (e.layerY > elm.offsetTop && e.layerY < elm.offsetTop+15) {
+				over = $(elm);
+				return false;
 			}
 		});
 		
-	$('#assembler textarea').scroll(function() {
+		if (over) {
+			var line = over.index()+1;
+			var start = mapping.ansic[line][0];
+			var end = mapping.ansic[line][1];
+		
+			if (start) {
+				selectLines($(this), false, line);
+				selectLines($('#assembler textarea'), true, start, end);
+				selectLines($('#byte textarea'), true, mapping.assembler[start], mapping.assembler[end]);
+			}
+		}
+	});
+		
+	$('#assembler textarea').mousemove(function(e) {
+		var pres = $(this).prev().children();
+		var over;
+		
+		pres.each(function(index, elm) {
+			if (e.layerY > elm.offsetTop && e.layerY < elm.offsetTop+15) {
+				over = $(elm);
+				return false;
+			}
+		});
+		
+		if (over) {
+			var line = over.index()+1;
+			var mappedLine = mapping.assembler[line];
+		
+			if (mappedLine) {
+				selectLines($(this), false, line);
+				selectLines($('#byte textarea'), true, mappedLine);
+			}
+		}
+	});
+		
+/*	$('#assembler textarea').scroll(function() {
 		$('#byte textarea').scrollTop($(this).scrollTop());
 	});
 	
 	$('#byte textarea').scroll(function() {
 		$('#assembler textarea').scrollTop($(this).scrollTop());
-	});
+	});*/
 });
 
 function compile() {
@@ -119,7 +143,7 @@ function insertAtCaret(element, text) {
 	}
 }
 
-function selectLines(editor, start, end) {
+function selectLines(editor, scroll, start, end) {
 	var pres = editor.prev().children();
 	pres.removeClass('activeline'); // deselect all
 	
@@ -131,7 +155,10 @@ function selectLines(editor, start, end) {
 		pres.eq(i-1).addClass('activeline');
 	}
 	
-	$('#assembler textarea').scrollTop(pres.get(start-1).offsetTop-50); // scroll to top of selection
+	var offset = pres.get(start-1).offsetTop;
+	if (scroll) {
+		editor.scrollTop(offset-50); // scroll to top of selection
+	}
 }
 
 function updateEditor(editor, value) {

@@ -38,13 +38,17 @@ else {
 	
 	$lastMapping = null;
 	$lastLine = null;
-	$mapping = array();
+	$mapping = array(
+		'ansic' => array(),	// ansic => assembler
+		'assembler' => array()	// assembler => bytecode
+	);
 
 	foreach ($dumpLines as $line) { // parsing objdump
 		if (preg_match('/^\s+([0-9a-f]+):\t([0-9a-f ]{5})\s+(.*)(\t;.*)?/', $line, $matches)) { // mnemonic
 			$mnemonic = ($comments && isset($matches[4])) ? $matches[3] . $matches[4] : $matches[3];
 			$assembler[] = $mnemonic;
 			$byte[] = format($matches[2], $format);
+			$mapping['assembler'][count($assembler)] = count($byte);
 		}
 		elseif (preg_match('/^([0-9a-f]{8}) <(.*)>:/', $line, $matches)) { // label
 			$assembler[] = $matches[2] . ':';
@@ -54,7 +58,7 @@ else {
 			$currentLine = $matches[1];
 			
 			if ($lastMapping && $lastLine) {
-				$mapping[$lastLine] = array($lastMapping, $currentMapping);
+				$mapping['ansic'][$lastLine] = array($lastMapping, $currentMapping);
 			}
 			
 			$lastLine = $currentLine;
