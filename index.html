@@ -26,6 +26,9 @@
 						<select size="1" >
 							<option value="ex1.c">Simple Loop</option>
 							<option value="ex2.c">Fibonacci</option>
+							<option value="ex3.c">Arithmetik</option>
+							<option value="ex4.c">Interrupt</option>
+							<option value="ex5.c">Lauflicht</option>
 						</select>
 					</div>
 				</div>
@@ -43,11 +46,15 @@
 				</div>
 			</td>
 		</tr>
-		<tr><td colspan="3" id="messages">
+		<tr class="popup"><td colspan="3" id="messages">
 			<h3>Fehler</h3>
 			<pre></pre>
 		</td></tr>
-		<tr><td colspan="3" id="options">
+		<tr class="popup"><td colspan="3" id="stats">
+			<h3>Statistik</h3>
+			<div></div>
+		</td></tr>
+		<tr class="popup"><td colspan="3" id="options">
 			<h3>Options</h3>
 			<div><form name="options">
 				<table>
@@ -65,8 +72,8 @@
 							<optgroup label="MCU Typ">
 								<option value="attiny45">ATTiny45</option>
 								<option value="atmega8u2">ATMega8u2</option>
-								<option value="atmega8" selected="selected">ATMega8</option>
-								<option value="atmega16">ATMega16</option>
+								<option value="atmega8">ATMega8</option>
+								<option value="atmega16" selected="selected">ATMega16</option>
 								<option value="atmega328p">ATMega328p (Arduino)</option>
 								<option value="atmega644p">ATMega644p</option>
 								<option value="atxmega128a1">ATXMega128</option>
@@ -78,7 +85,7 @@
 								<option value="atmega103">"Classic" CPU core, 128 KB of ROM</option>
 								<option value="attiny167">"Classic" CPU core with 'MOVW' and 'LPM Rx, Z[+]' instruction, 16 KB to 64 KB of ROM</option>
 								<option value="atmega48">"Enhanced" CPU core, up to 8 KB of ROM</option>
-								<option value="atmega16">"Enhanced" CPU core, 16 KB to 64 KB of ROM</option>
+								<option value="atmega161">"Enhanced" CPU core, 16 KB to 64 KB of ROM</option>
 								<option value="atmega1284p">"Enhanced" CPU core, 128 KB of ROM</option>
 								<option value="atmega2560">"Enhanced" CPU core, 256 KB of ROM</option>
 							</optgroup>
