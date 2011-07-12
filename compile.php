@@ -24,7 +24,22 @@ elseif (strlen($code) > $maxLength) {
 else {
 	// compile
 	$outFile = tempnam('/tmp', 'tc_out_');
-	$disableOptimize = ' -O0 -fno-align-loops -fno-argument-alias -fno-auto-inc-dec -fno-branch-count-reg -fno-common -fno-early-inlining -fno-eliminate-unused-debug-types -fno-function-cse -fno-gcse-lm -fno-ident -fno-ivopts -fno-keep-static-consts -fno-leading-underscore -fmath-errno -fno-merge-debug-strings -fno-move-loop-invariants -fpeephole -fno-reg-struct-return -fno-sched-interblock -fno-sched-spec -fno-sched-stalled-insns-dep -fno-signed-zeros -fno-split-ivs-in-unroller -fno-toplevel-reorder -fno-trapping-math -fno-tree-cselim -fno-tree-loop-im -fno-tree-loop-ivcanon -fno-tree-loop-optimize -fno-tree-reassoc -fno-tree-scev-cprop -fno-tree-vect-loop-version -fno-var-tracking -fno-verbose-asm -fno-zero-initialized-in-bss -fno-argument-noalias -fno-math-errno -fno-pcc-struct-return -fno-peephole';
+	$disableOptimize = ' -O0 -fno-align-loops -fno-argument-alias' .
+		' -fno-auto-inc-dec -fno-branch-count-reg -fno-common' .
+		' -fno-early-inlining -fno-eliminate-unused-debug-types' .
+		' -fno-function-cse -fno-gcse-lm -fno-ident -fno-ivopts' .
+		' -fno-keep-static-consts -fno-leading-underscore' .
+		' -fmath-errno -fno-merge-debug-strings' .
+		' -fno-move-loop-invariants -fpeephole -fno-reg-struct-return' .
+		' -fno-sched-interblock -fno-sched-spec -fno-sched-stalled-insns-dep' .
+		' -fno-signed-zeros -fno-split-ivs-in-unroller' .
+		' -fno-toplevel-reorder -fno-trapping-math -fno-tree-cselim' .
+		' -fno-tree-loop-im -fno-tree-loop-ivcanon -fno-tree-loop-optimize' .
+		' -fno-tree-reassoc -fno-tree-scev-cprop -fno-tree-vect-loop-version' .
+		' -fno-var-tracking -fno-verbose-asm -fno-zero-initialized-in-bss' .
+		' -fno-argument-noalias -fno-math-errno' .
+		' -fno-pcc-struct-return -fno-peephole';
+		
 	$cmd = 'avr-gcc -mmcu=' . $mmcu . ' -g3 -o ' . $outFile . ' ' . $codeFile;
 	
 	if ($oLevel < 0) {
@@ -42,7 +57,6 @@ else {
 
 	// refactor
 	$dumpLines = explode("\n", $dump);
-	
 	$lastMapping = null;
 	$lastLine = null;
 	$assembler = array();
@@ -55,7 +69,6 @@ else {
 	);
 
 	foreach ($dumpLines as $line) { // parsing objdump
-	//
 		if (preg_match( // mnemonic
 			'/^\s{2}([0-9a-f]{2}):\t' . // address	\s{2}9a:\ŧ
 			'((?:[0-9a-f]{2}\s)+)\s+' . // byte	ec e5\s+\t
@@ -80,6 +93,7 @@ else {
 			$assembler[] = $as;
 			$byte[] = format($bytes, $format);
 			$mnemonics[$matches[3]] = (isset($mnemonics[$matches[3]])) ? $mnemonics[$matches[3]] + 1 : 1;
+			
 			$mapping['assembler'][count($assembler)] = count($byte);
 			$mapping['byte'][count($byte)] = count($assembler);
 		}
@@ -133,12 +147,12 @@ function format($data, $format) {
 		}, $data));
 	}
 	else { // if ($format == 'bin') { default
-		return implode(' ', array_map(function($value) {
-		
-			return str_pad(decbin($value), 4, '0', STR_PAD_LEFT);
-		}, str_split(implode('', array_map(function($value) {
-			return str_pad(dechex($value), 2, '0', STR_PAD_LEFT);
-		}, $data)))));
+		$bin = array();
+		foreach ($data as $byte) {
+			$bin[] = str_pad(decbin($byte >> 4), 4, '0', STR_PAD_LEFT); // high nipple
+			$bin[] = str_pad(decbin($byte & 0x0f), 4, '0', STR_PAD_LEFT); // low nipple
+		}
+		return implode(' ', $bin);
 	}
 }
 

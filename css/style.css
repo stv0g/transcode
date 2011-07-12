@@ -79,6 +79,10 @@ h3 {
 	padding: 6px;
 }
 
+#stats > div {
+	display: none;
+}
+
 #about {
 	float: right;
 	padding: 3em 1em;

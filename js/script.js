@@ -1,5 +1,5 @@
-var mapping = new Array;
-var timeout = null;
+var mapping;
+var timeout;
 
 $(document).ready(function(){
 	// load default code
@@ -40,21 +40,22 @@ $(document).ready(function(){
 			}
 		});
 		
-	$('#ansic textarea').mousemove(function(e) {
-		var hover = getHoverLine($(this), e);
-		if (hover) {
-			var line = hover.index()+1;
+	$('#ansic textarea')
+		.mousemove(function(e) {
+			var hover = getHoverLine($(this), e);
+			if (hover) {
+				var line = hover.index()+1;
 			
-			if (mapping.ansic[line]) {
-				var start = mapping.ansic[line][0];
-				var end = mapping.ansic[line][1];
+				if (mapping.ansic[line]) {
+					var start = mapping.ansic[line][0];
+					var end = mapping.ansic[line][1];
 		
-				selectLines($(this), false, line);
-				selectLines($('#assembler textarea'), true, start, end);
-				selectLines($('#byte textarea'), true, mapping.assembler[start], mapping.assembler[end]);
+					selectLines($(this), false, line);
+					selectLines($('#assembler textarea'), true, start, end);
+					selectLines($('#byte textarea'), true, mapping.assembler[start], mapping.assembler[end]);
+				}
 			}
-		}
-	});
+		});		
 		
 	$('#assembler textarea').mousemove(function(e) {
 		var hover = getHoverLine($(this), e);
@@ -87,10 +88,13 @@ function compile() {
 	var code = $('#ansic textarea').val();
 		
 	$.post('compile.php?' + $('form').serialize(), code, function(json) {
+		mapping = json.mapping;
+		timeout = null; // free timeout
+		
 		updateEditor($('#assembler .editor textarea'), json.code.assembler);
 		updateEditor($('#byte .editor textarea'), json.code.byte);
 		renderStats(json.stats);
-
+		
 		if (json.messages) {
 			$('#messages pre').text(json.messages);
 			$('#messages').show('slow');
@@ -98,9 +102,6 @@ function compile() {
 		else {
 			$('#messages').hide('slow');
 		}
-		
-		mapping = json.mapping;
-		timeout = null; // free timeout
 	}, 'json');
 }
 
@@ -160,7 +161,7 @@ function updateEditor(editor, value) {
 	var lines = editor.val().split("\n").length;
 	
 	overlay.empty();
-	for (var i = 0; i < lines; i++) {
+	for (var i = 0; i < lines+2; i++) {
 		overlay.append($('<pre>').text(i+1));
 	}
 }
@@ -187,12 +188,18 @@ function getHoverLine(editor, e) {
 }
 
 function renderStats(stats) {
-	var table = $('<table>');
+	var cLines = $('#ansic textarea').val().split("\n").length;
+	var asInstr = $('#byte textarea').val().split("\n").length;
 	var max;
+	
+	var par = $('<p>')
+		.html('Dein Code besteht aus ' + cLines + ' Zeilen Code, die in '
+			+ asInstr + ' Assembler Instruktionen &uuml;bersetzt werden. Das sind '
+			+ Math.round(asInstr/cLines) + ' mal mehr Instruktionen als C-Zeilen!');
+	var table = $('<table>');
 	
 	for (var mnemonic in stats) {
 		var count = stats[mnemonic];
-	
 		if (!max) max = count;
 	
 		table.append(
@@ -205,5 +212,5 @@ function renderStats(stats) {
 		);
 	}
 	
-	$('#stats div').empty().append(table);
+	$('#stats div').empty().append(par).append(table);
 }
