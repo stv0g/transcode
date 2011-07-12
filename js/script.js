@@ -2,7 +2,11 @@ var mapping = new Array;
 var timeout = null;
 
 $(document).ready(function(){
-	$('h3').click(function() {
+	// load default code
+	loadCode($('#examples option:selected').val());
+
+	// bind events
+	$('.popup h3').click(function() {
 		$(this).next().toggle('slow');
 		return false;
 	});
@@ -10,9 +14,6 @@ $(document).ready(function(){
 	$('form').change(function() {
 		compile();
 	});
-	
-	// load default code
-	loadCode('ex1.c');
 	
 	$('#examples select').change(function() {
 		loadCode($(this).val());
@@ -40,22 +41,14 @@ $(document).ready(function(){
 		});
 		
 	$('#ansic textarea').mousemove(function(e) {
-		var pres = $(this).prev().children();
-		var over;
+		var hover = getHoverLine($(this), e);
+		if (hover) {
+			var line = hover.index()+1;
+			
+			if (mapping.ansic[line]) {
+				var start = mapping.ansic[line][0];
+				var end = mapping.ansic[line][1];
 		
-		pres.each(function(index, elm) {
-			if (e.layerY > elm.offsetTop && e.layerY < elm.offsetTop+15) {
-				over = $(elm);
-				return false;
-			}
-		});
-		
-		if (over) {
-			var line = over.index()+1;
-			var start = mapping.ansic[line][0];
-			var end = mapping.ansic[line][1];
-		
-			if (start) {
 				selectLines($(this), false, line);
 				selectLines($('#assembler textarea'), true, start, end);
 				selectLines($('#byte textarea'), true, mapping.assembler[start], mapping.assembler[end]);
@@ -64,34 +57,30 @@ $(document).ready(function(){
 	});
 		
 	$('#assembler textarea').mousemove(function(e) {
-		var pres = $(this).prev().children();
-		var over;
-		
-		pres.each(function(index, elm) {
-			if (e.layerY > elm.offsetTop && e.layerY < elm.offsetTop+15) {
-				over = $(elm);
-				return false;
-			}
-		});
-		
-		if (over) {
-			var line = over.index()+1;
-			var mappedLine = mapping.assembler[line];
-		
-			if (mappedLine) {
+		var hover = getHoverLine($(this), e);
+		if (hover) {
+			var line = hover.index()+1;
+
+			if (mapping.assembler[line]) {
+				var mappedLine = mapping.assembler[line];
 				selectLines($(this), false, line);
 				selectLines($('#byte textarea'), true, mappedLine);
 			}
 		}
 	});
-		
-/*	$('#assembler textarea').scroll(function() {
-		$('#byte textarea').scrollTop($(this).scrollTop());
-	});
 	
-	$('#byte textarea').scroll(function() {
-		$('#assembler textarea').scrollTop($(this).scrollTop());
-	});*/
+	$('#byte textarea').mousemove(function(e) {
+		var hover = getHoverLine($(this), e);
+		if (hover) {
+			var line = hover.index()+1;
+
+			if (mapping.byte[line]) {
+				var mappedLine = mapping.byte[line];
+				selectLines($(this), false, line);
+				selectLines($('#assembler textarea'), true, mappedLine);
+			}
+		}
+	});
 });
 
 function compile() {
@@ -100,6 +89,7 @@ function compile() {
 	$.post('compile.php?' + $('form').serialize(), code, function(json) {
 		updateEditor($('#assembler .editor textarea'), json.code.assembler);
 		updateEditor($('#byte .editor textarea'), json.code.byte);
+		renderStats(json.stats);
 
 		if (json.messages) {
 			$('#messages pre').text(json.messages);
@@ -176,8 +166,44 @@ function updateEditor(editor, value) {
 }
 
 function loadCode(file) {
-	$.get(file, function(data) {
+	$.get('examples/' + file, function(data) {
 		updateEditor($('#ansic textarea'), data);
 		compile();
 	});
+}
+
+function getHoverLine(editor, e) {
+	var pres = editor.prev().children();
+	var hover = undefined;
+		
+	pres.each(function(index, elm) {
+		if (e.layerY > elm.offsetTop && e.layerY < elm.offsetTop+15) {
+			hover = $(elm);
+			return false;
+		}
+	});
+	
+	return hover;
+}
+
+function renderStats(stats) {
+	var table = $('<table>');
+	var max;
+	
+	for (var mnemonic in stats) {
+		var count = stats[mnemonic];
+	
+		if (!max) max = count;
+	
+		table.append(
+			$('<tr>').append($('<td>').text(mnemonic))
+				.append(
+					$('<td>').append(
+						$('<div>').text(count).width(800*count/max).addClass('bar')
+					)
+				)
+		);
+	}
+	
+	$('#stats div').empty().append(table);
 }

@@ -22,7 +22,7 @@ h3 {
 }
 
 #byte {
-	width: 210px;
+	width: 250px;
 }
 
 #ansic textarea {
@@ -70,6 +70,15 @@ h3 {
 	background: #82FA58;
 }
 
+.bar {
+	background-color: orange;
+}
+
+.popup > td {
+	border: 1px solid gray;
+	padding: 6px;
+}
+
 #about {
 	float: right;
 	padding: 3em 1em;
@@ -86,16 +95,8 @@ h3 {
 	padding: 3em 1em;
 }
 
-#options {
-	padding: 6px;
-	border: 1px solid gray;
-}
-
 #messages {
-	width: 100%;
 	display: none;
 	background-color: #F79F81;
-	padding: 6px;
-	border: 1px solid gray;
 }
 
