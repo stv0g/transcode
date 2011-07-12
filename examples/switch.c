@@ -26,4 +26,5 @@ int main ( void ) {
 		++str_p;
 	} while (*str_p);
 
+	return 0;
 }

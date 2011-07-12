@@ -9,5 +9,5 @@ int main ( void ) {
 		foo--;
 	}
 
-	while (1) { /* tue nichts */ }
+	return 0;
 }

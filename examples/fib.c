@@ -13,5 +13,5 @@ int main ( void ) {
 	PORTB = (uint8_t) result;
 	PORTC = (uint8_t) result >> 8;
 
-	while (1) { /* tue nichts */ }
+	return 0;
 }

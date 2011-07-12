@@ -9,8 +9,10 @@ int main ( void ) {
 	OCR0 = 123;
 	TIMSK |= (1 << OCIE0);
 	TIFR |= (1 << OCF0);
-	 
+
 	sei();
+
+	return 0;
 }
 
 ISR(TIMER0_COMP_vect) {

@@ -13,5 +13,5 @@ int main ( void ) {
 	res = bar & foo;
 	res = bar % foo;
 
-	while (1) { /* tue nichts */ }
+	return 0;
 }
