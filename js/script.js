@@ -8,7 +8,6 @@ $(document).ready(function(){
 	// bind events
 	$('.popup h3').click(function() {
 		$(this).next().toggle('slow');
-		return false;
 	});
 	
 	$('form').change(function() {
