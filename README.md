@@ -12,12 +12,18 @@ Eine Demo Installation ist hier verfügbar: http://t0.0l.de/transcode/
 transcode benötigt einen Webserver, PHP Interpreter und den AVR C Compiler
 aus der Gnu Compiler Collection (avr-gcc).
 
+*  Apache (http://httpd.apache.org/)
+*  PHP5 (http://php.net)
+*  GCC (http://gcc.gnu.org/)
+   Use `configure --target=avr --enable-languages="c"' to configure GCC. 
+
 PHP darf nicht im "Safemode" laufen, da das Skript den Compiler mit exec() aufrufen muss.
 
+Getestet und entwickelt wurde mit den aktuellsten Versionen der oben genannten Software unter Debian Squeeze.
+
 ### Ubuntu/Debian ###
-```
-sudo apt-get install apache2 php5 libapache2-mod-php5 avr-gcc
-```
+
+    sudo apt-get install apache2 php5 libapache2-mod-php5 avr-gcc
 
 ###
 
