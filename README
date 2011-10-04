@@ -1,5 +1,0 @@
-transcode translates standard ANSI C-code simultaniously into assembler and byte code.
-
-A demo installation is available here: http://t0.0l.de/transcode/
-
-Steffen Vogel <info@steffenvogel.de>
